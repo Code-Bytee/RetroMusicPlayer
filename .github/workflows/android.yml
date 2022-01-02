@@ -30,8 +30,8 @@ jobs:
         storePassword=android
         keyPassword=android
         EOF
-    - name: Build with Gradle
-      run: ./gradlew build
+      - name: Build with Gradle
+        run: ./gradlew build
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
@@ -64,4 +64,3 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apk/app-debug.apk
           asset_name: MensaApp.apk
-          asset_content_type: application/zip
