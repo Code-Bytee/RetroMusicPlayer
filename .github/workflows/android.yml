@@ -31,7 +31,7 @@ jobs:
         keyPassword=android
         EOF
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew assambleRelease
     - name: Upload Archiver File
       uses: actions/upload-artifact@v2
       with:
