@@ -66,4 +66,4 @@ jobs:
 
           name: Retro
 
-          path: app/build/outputs/apk/release/*.apk
+          path: app/build/outputs/apk
