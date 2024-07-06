@@ -45,8 +45,10 @@ import code.name.monkey.retromusic.dialogs.AddToPlaylistDialog
 import code.name.monkey.retromusic.dialogs.DeleteSongsDialog
 import code.name.monkey.retromusic.extensions.*
 import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
-import code.name.monkey.retromusic.glide.GlideApp
 import code.name.monkey.retromusic.glide.RetroGlideExtension
+import code.name.monkey.retromusic.glide.RetroGlideExtension.albumCoverOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.artistImageOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.asBitmapPalette
 import code.name.monkey.retromusic.glide.SingleColorTarget
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.SortOrder.AlbumSongSortOrder.Companion.SONG_A_Z
@@ -60,6 +62,7 @@ import code.name.monkey.retromusic.network.Result
 import code.name.monkey.retromusic.network.model.LastFmAlbum
 import code.name.monkey.retromusic.repository.RealRepository
 import code.name.monkey.retromusic.util.*
+import com.bumptech.glide.Glide
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.transition.MaterialArcMotion
 import com.google.android.material.transition.MaterialContainerTransform
@@ -230,9 +233,11 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
                 is Result.Loading -> {
                     logD("Loading")
                 }
+
                 is Result.Error -> {
                     logE("Error")
                 }
+
                 is Result.Success -> {
                     aboutAlbum(result.data)
                 }
@@ -285,7 +290,7 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
         detailsViewModel.getMoreAlbums(artist).observe(viewLifecycleOwner) {
             moreAlbums(it)
         }
-        GlideApp.with(requireContext())
+        Glide.with(requireContext())
             //.forceDownload(PreferenceUtil.isAllowedToDownloadMetadata())
             .load(
                 RetroGlideExtension.getArtistModel(
@@ -300,7 +305,8 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
     }
 
     private fun loadAlbumCover(album: Album) {
-        GlideApp.with(requireContext()).asBitmapPalette()
+        Glide.with(requireContext())
+            .asBitmapPalette()
             .albumCoverOptions(album.safeGetFirstSong())
             //.checkIgnoreMediaStore()
             .load(RetroGlideExtension.getSongModel(album.safeGetFirstSong()))
@@ -332,7 +338,7 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_album_detail, menu)
         val sortOrder = menu.findItem(R.id.action_sort_order)
-        setUpSortOrderMenu(sortOrder.subMenu)
+        setUpSortOrderMenu(sortOrder.subMenu!!)
         ToolbarContentTintHelper.handleOnCreateOptionsMenu(
             requireContext(),
             binding.toolbar,
@@ -354,10 +360,12 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
                 MusicPlayerRemote.playNext(songs)
                 return true
             }
+
             R.id.action_add_to_current_playing -> {
                 MusicPlayerRemote.enqueue(songs)
                 return true
             }
+
             R.id.action_add_to_playlist -> {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val playlists = get<RealRepository>().fetchPlaylists()
@@ -368,10 +376,12 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
                 }
                 return true
             }
+
             R.id.action_delete_from_device -> {
                 DeleteSongsDialog.create(songs).show(childFragmentManager, "DELETE_SONGS")
                 return true
             }
+
             R.id.action_tag_editor -> {
                 val intent = Intent(requireContext(), AlbumTagEditorActivity::class.java)
                 intent.putExtra(AbsTagEditorActivity.EXTRA_ID, album.id)
@@ -385,6 +395,7 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
                 )
                 return true
             }
+
             R.id.action_sort_order_title -> sortOrder = SONG_A_Z
             R.id.action_sort_order_title_desc -> sortOrder = SONG_Z_A
             R.id.action_sort_order_track_list -> sortOrder = SONG_TRACK_LIST
@@ -403,6 +414,7 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
             SONG_Z_A -> sortOrder.findItem(R.id.action_sort_order_title_desc).isChecked = true
             SONG_TRACK_LIST ->
                 sortOrder.findItem(R.id.action_sort_order_track_list).isChecked = true
+
             SONG_DURATION ->
                 sortOrder.findItem(R.id.action_sort_order_artist_song_duration).isChecked = true
         }
@@ -416,19 +428,23 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
                     o2.trackNumber
                 )
             }
+
             SONG_A_Z -> {
                 val collator = Collator.getInstance()
                 album.songs.sortedWith { o1, o2 -> collator.compare(o1.title, o2.title) }
             }
+
             SONG_Z_A -> {
                 val collator = Collator.getInstance()
                 album.songs.sortedWith { o1, o2 -> collator.compare(o2.title, o1.title) }
             }
+
             SONG_DURATION -> album.songs.sortedWith { o1, o2 ->
                 o1.duration.compareTo(
                     o2.duration
                 )
             }
+
             else -> throw IllegalArgumentException("invalid $sortOrder")
         }
         album = album.copy(songs = songs)

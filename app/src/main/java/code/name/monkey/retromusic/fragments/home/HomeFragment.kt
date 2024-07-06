@@ -35,17 +35,22 @@ import code.name.monkey.retromusic.adapter.HomeAdapter
 import code.name.monkey.retromusic.databinding.FragmentHomeBinding
 import code.name.monkey.retromusic.dialogs.CreatePlaylistDialog
 import code.name.monkey.retromusic.dialogs.ImportPlaylistDialog
-import code.name.monkey.retromusic.extensions.*
+import code.name.monkey.retromusic.extensions.accentColor
+import code.name.monkey.retromusic.extensions.dip
+import code.name.monkey.retromusic.extensions.elevatedAccentColor
+import code.name.monkey.retromusic.extensions.setUpMediaRouteButton
 import code.name.monkey.retromusic.fragments.ReloadType
 import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
-import code.name.monkey.retromusic.glide.GlideApp
 import code.name.monkey.retromusic.glide.RetroGlideExtension
+import code.name.monkey.retromusic.glide.RetroGlideExtension.profileBannerOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.songCoverOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.userProfileOptions
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.interfaces.IScrollHelper
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.PreferenceUtil.userName
-import com.google.android.material.shape.MaterialShapeDrawable
+import com.bumptech.glide.Glide
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 
@@ -86,9 +91,6 @@ class HomeFragment :
         colorButtons()
         postponeEnterTransition()
         view.doOnPreDraw { startPostponedEnterTransition() }
-        binding.appBarLayout.statusBarForeground =
-            MaterialShapeDrawable.createWithElevationOverlay(requireContext())
-        binding.toolbar.drawNextToNavbar()
         view.doOnLayout {
             adjustPlaylistButtons()
         }
@@ -163,18 +165,18 @@ class HomeFragment :
             findNavController().navigate(R.id.action_search, null, navOptions)
         }
         val hexColor = String.format("#%06X", 0xFFFFFF and accentColor())
-        val appName = "Retro <span  style='color:$hexColor';>Music</span>".parseAsHtml()
-        binding.appNameText.text = appName
+        val appName = "Retro <font color=$hexColor>Music</font>".parseAsHtml()
+        binding.appBarLayout.title = appName
     }
 
     private fun loadProfile() {
         binding.bannerImage?.let {
-            GlideApp.with(requireContext())
+            Glide.with(requireContext())
                 .load(RetroGlideExtension.getBannerModel())
                 .profileBannerOptions(RetroGlideExtension.getBannerModel())
                 .into(it)
         }
-        GlideApp.with(requireActivity())
+        Glide.with(requireActivity())
             .load(RetroGlideExtension.getUserModel())
             .userProfileOptions(RetroGlideExtension.getUserModel(), requireContext())
             .into(binding.userImage)
@@ -265,7 +267,7 @@ class HomeFragment :
                     MusicPlayerRemote.playNextSong()
                 }
             }
-            GlideApp.with(this)
+            Glide.with(this)
                 .load(RetroGlideExtension.getSongModel(songs[index]))
                 .songCoverOptions(songs[index])
                 .into(imageView)
@@ -289,10 +291,12 @@ class HomeFragment :
                 null,
                 navOptions
             )
+
             R.id.action_import_playlist -> ImportPlaylistDialog().show(
                 childFragmentManager,
                 "ImportPlaylist"
             )
+
             R.id.action_add_to_playlist -> CreatePlaylistDialog.create(emptyList()).show(
                 childFragmentManager,
                 "ShowCreatePlaylistDialog"

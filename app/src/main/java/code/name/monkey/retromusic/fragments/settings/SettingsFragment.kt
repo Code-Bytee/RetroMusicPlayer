@@ -24,7 +24,6 @@ import code.name.monkey.appthemehelper.util.VersionUtils
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.appshortcuts.DynamicShortcutManager
 import code.name.monkey.retromusic.databinding.FragmentSettingsBinding
-import code.name.monkey.retromusic.extensions.applyToolbar
 import code.name.monkey.retromusic.extensions.findNavController
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.color.ColorCallback
@@ -39,14 +38,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), ColorCallback {
     }
 
     private fun setupToolbar() {
-        applyToolbar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
-        }
         val navController: NavController = findNavController(R.id.contentFrame)
+        with (binding.appBarLayout.toolbar) {
+            setNavigationIcon(R.drawable.ic_arrow_back)
+            isTitleCentered = false
+            setNavigationOnClickListener {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            }
+        }
+
         navController.addOnDestinationChangedListener { _, _, _ ->
-            binding.collapsingToolbarLayout.title =
-                navController.currentDestination?.let { getStringFromDestination(it) }
+            binding.appBarLayout.title =
+                navController.currentDestination?.let { getStringFromDestination(it) }.toString()
         }
     }
 

@@ -48,7 +48,7 @@ import com.google.android.material.slider.Slider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 /**
  * Created by hemanths on 20/09/17.
@@ -58,7 +58,7 @@ class FullPlaybackControlsFragment :
     AbsPlayerControlsFragment(R.layout.fragment_full_player_controls),
     PopupMenu.OnMenuItemClickListener {
 
-    private val libraryViewModel: LibraryViewModel by sharedViewModel()
+    private val libraryViewModel: LibraryViewModel by activityViewModel()
     private var _binding: FragmentFullPlayerControlsBinding? = null
     private val binding get() = _binding!!
 
